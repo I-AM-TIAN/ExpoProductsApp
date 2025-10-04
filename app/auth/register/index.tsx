@@ -3,6 +3,8 @@ import React from "react";
 import { View } from "react-native";
 
 const RegisterScreen = () => {
+  const { height } = useWindowDimensions();
+  const backgroundColor = useThemeColor({}, 'background');
   return (
     <View>
       <ThemedText>RegisterScreen</ThemedText>
