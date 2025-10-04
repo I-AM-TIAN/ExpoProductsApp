@@ -1,4 +1,4 @@
-import { ThemedText } from "@/presentation/theme/components/themed-text";
+import { ThemedText } from "@/presentation/theme/components/ThemeText";
 import ThemedLink from "@/presentation/theme/components/ThemedLink";
 import React from "react";
 import { KeyboardAvoidingView, useWindowDimensions, View } from "react-native";
@@ -9,14 +9,16 @@ const LoginScreen = () => {
 
   return (
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-      <ScrollView>
+      <ScrollView style={{ paddingHorizontal: 20 }}>
         <View
           style={{
             paddingTop: height * 0.35,
           }}
         >
-          <ThemedText type="title">Ingresar</ThemedText>
+          <ThemedText type="title">Bienvenido</ThemedText>
+        </View>
 
+        <View>
           <ThemedLink href="/auth/register" style={{ marginHorizontal: 20 }}>
             Registrarse
           </ThemedLink>

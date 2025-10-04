@@ -1,6 +1,6 @@
-import { ThemedText } from '@/presentation/theme/components/themed-text';
-import { useThemeColor } from '@/presentation/theme/hooks/use-theme-color';
-import { useWindowDimensions, View } from 'react-native';
+import { ThemedText } from "@/presentation/theme/components/ThemeText";
+import React from "react";
+import { View } from "react-native";
 
 const RegisterScreen = () => {
   const { height } = useWindowDimensions();
@@ -9,7 +9,7 @@ const RegisterScreen = () => {
     <View>
       <ThemedText>RegisterScreen</ThemedText>
     </View>
-  )
-}
+  );
+};
 
 export default RegisterScreen;
