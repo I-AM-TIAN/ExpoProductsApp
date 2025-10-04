@@ -38,13 +38,23 @@ const LoginScreen = () => {
           />
         </View>
 
+        {/*espacio entre inputs y botones*/}
+        <View style={{ marginTop: 10 }} />
+
         {/*bootón de login*/}
         <ThemedButton icon="arrow-forward-outline">Ingresar</ThemedButton>
 
         {/*link a register*/}
-        <View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ThemedText>¿Aún no tienes cuenta?</ThemedText>
           <ThemedLink href="/auth/register" style={{ marginHorizontal: 20 }}>
-            Registrarse
+            Crear cuenta
           </ThemedLink>
         </View>
       </ScrollView>
