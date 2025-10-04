@@ -1,3 +1,4 @@
+import ThemedButton from "@/presentation/theme/components/ThemedButton";
 import ThemedLink from "@/presentation/theme/components/ThemedLink";
 import { ThemedText } from "@/presentation/theme/components/ThemedText";
 import ThemedTextInput from "@/presentation/theme/components/ThemedTextInput";
@@ -37,6 +38,10 @@ const LoginScreen = () => {
           />
         </View>
 
+        {/*bootón de login*/}
+        <ThemedButton icon="arrow-forward-outline">Ingresar</ThemedButton>
+
+        {/*link a register*/}
         <View>
           <ThemedLink href="/auth/register" style={{ marginHorizontal: 20 }}>
             Registrarse
