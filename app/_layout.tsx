@@ -23,10 +23,7 @@ export default function RootLayout() {
     KanitBold: require("../assets/fonts/Kanit-Bold.ttf"),
     KanitThin: require("../assets/fonts/Kanit-Thin.ttf"),
   });
-  <Stack
-    initialRouteName="auth/login" // ← arranca en /auth/login
-    screenOptions={{ headerShown: false }}
-  />;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
