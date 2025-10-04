@@ -1,5 +1,5 @@
 import { ThemedText } from "@/presentation/theme/components/ThemedText";
-import { useThemeColor } from "@/presentation/theme/hooks/use-theme-color";
+import { useThemeColor } from "@/presentation/theme/hooks/useThemeColor";
 import { View } from "react-native";
 
 const HomeScreen = () => {
