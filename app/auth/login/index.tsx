@@ -1,5 +1,5 @@
-import { ThemedText } from "@/presentation/theme/components/ThemeText";
 import ThemedLink from "@/presentation/theme/components/ThemedLink";
+import { ThemedText } from "@/presentation/theme/components/ThemedText";
 import React from "react";
 import { KeyboardAvoidingView, useWindowDimensions, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
