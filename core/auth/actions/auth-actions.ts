@@ -28,21 +28,31 @@ const returnUserToken = (data: AuthResponse): { user: User; token: string } => {
     };
 };
 
+import axios from 'axios';
+// ...
+
 export const authLogin = async (email: string, password: string) => {
-    
-    email = email.toLowerCase();
+  email = email.toLowerCase();
 
-    try {
+  try {
+    console.log('LOGIN → baseURL:', productsApi.defaults.baseURL, 'endpoint:', '/auth/login');
+    const { data } = await productsApi.post<AuthResponse>('/auth/login', { email, password });
+    return returnUserToken(data);
 
-        const { data } = await productsApi.post<AuthResponse>('/auth/login', { email, password });
-        
-        return returnUserToken(data);
-
-    } catch (error) {
-        console.log(error);
-        throw new Error('Error al iniciar sesión');
+  } catch (err: any) {
+    if (axios.isAxiosError(err)) {
+      console.log('LOGIN ERROR →', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
+        url: (err.config?.baseURL || '') + (err.config?.url || ''),
+      });
+      throw new Error(err.response?.data?.message || `Fallo login (${err.response?.status ?? 'sin status'}).`);
     }
-}
+    console.log('LOGIN ERROR (no-axios) →', err);
+    throw new Error('Error al iniciar sesión');
+  }
+};
 
 export const authCheckStatus = async () => {
     try {
