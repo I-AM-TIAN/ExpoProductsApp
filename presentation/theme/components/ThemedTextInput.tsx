@@ -1,13 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRef, useState } from "react";
-import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
+import {
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  View,
+  ViewProps,
+} from "react-native";
 import { useThemeColor } from "../hooks/useThemeColor";
 
-interface Props extends TextInputProps {
+interface Props extends Omit<TextInputProps, "style"> {
   icon?: keyof typeof Ionicons.glyphMap;
+  style?: ViewProps["style"];
 }
 
-const ThemedTextInput = ({ icon, ...rest }: Props) => {
+const ThemedTextInput = ({ icon, style, ...rest }: Props) => {
   const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "primary");
 
@@ -17,8 +24,11 @@ const ThemedTextInput = ({ icon, ...rest }: Props) => {
   return (
     <View
       style={[
-        styles.container,
-        { borderColor: isActive ? primaryColor : "#E5E7EB" }, // gris sutil
+        {
+          ...styles.container,
+          borderColor: isActive ? primaryColor : "#E5E7EB",
+        },
+        style,
       ]}
       onTouchStart={() => inputRef.current?.focus()}
     >
@@ -48,12 +58,12 @@ export default ThemedTextInput;
 const styles = StyleSheet.create({
   // contenedor visual del input
   container: {
-    height: 50,                 // alto como la maqueta
+    height: 50, // alto como la maqueta
     backgroundColor: "#F4F4F5", // gris claro de relleno
     borderWidth: 1,
-    borderRadius: 12,           // más redondeado
-    paddingHorizontal: 14,      // padding lateral
-    marginBottom: 14,           // separación entre inputs
+    borderRadius: 12, // más redondeado
+    paddingHorizontal: 14, // padding lateral
+    marginBottom: 14, // separación entre inputs
     flexDirection: "row",
     alignItems: "center",
   },

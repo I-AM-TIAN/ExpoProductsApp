@@ -6,7 +6,7 @@ import React from "react";
 import { ActivityIndicator, View } from "react-native";
 const CheckAutenticationLayout = () => {
   const { status, checkStatus } = useAuthStore();
-  const backgroundColor = useThemeColor({}, 'background');
+  const backgroundColor = useThemeColor({}, "background");
 
   React.useEffect(() => {
     checkStatus();
@@ -38,7 +38,7 @@ const CheckAutenticationLayout = () => {
         headerStyle: {
           backgroundColor: backgroundColor,
         },
-        contentStyle:{
+        contentStyle: {
           backgroundColor: backgroundColor,
         },
       }}
@@ -47,7 +47,14 @@ const CheckAutenticationLayout = () => {
         name="(home)/index"
         options={{
           title: "Productos",
-          headerLeft: () => <LogoutIconButton/>,
+          headerLeft: () => <LogoutIconButton />,
+        }}
+      />
+
+      <Stack.Screen
+        name="product/[id]"
+        options={{
+          title: "Productos",
         }}
       />
     </Stack>

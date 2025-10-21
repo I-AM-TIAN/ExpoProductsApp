@@ -3,7 +3,7 @@ import { Product } from '../interfaces/product.interface';
 
 export const getProductById = async (id: string):Promise<Product> => {
     try {
-        const { data } = await productsApi.get<Product>('/products/${ id }',);
+        const { data } = await productsApi.get<Product>(`/products/${ id }`,);
 
         return {
             ...data,
