@@ -1,4 +1,6 @@
+import ProductImages from "@/presentation/products/components/ProductImages";
 import { useProduct } from "@/presentation/products/hooks/useProduct";
+import ThemeButtonGroup from "@/presentation/theme/components/ThemeButtonGroup";
 import ThemedTextInput from "@/presentation/theme/components/ThemedTextInput";
 import { ThemedView } from "@/presentation/theme/components/ThemedView";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,6 +53,8 @@ const ProductScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView>
+        <ProductImages images={product.images} />
+
         <ThemedView style={{ marginHorizontal: 10, marginTop: 20 }}>
           <ThemedTextInput placeholder="Titulo" style={{ marginVertical: 5 }} />
           <ThemedTextInput
@@ -71,7 +75,14 @@ const ProductScreen = () => {
         >
           <ThemedTextInput placeholder="Precio" style={{ flex: 1 }} />
           <ThemedTextInput placeholder="inventario" style={{ flex: 1 }} />
-          <ThemedTextInput placeholder="Categoria" style={{ flex: 1 }} />
+        </ThemedView>
+
+        <ThemedView style={{ marginHorizontal: 10 }}>
+          <ThemeButtonGroup
+            options={["Intercambio", "Venta", "Regalo"]}
+            selectedOptions={product.sizes}
+            onSelect={(options) => console.log({ options })}
+          />
         </ThemedView>
       </ScrollView>
     </KeyboardAvoidingView>
