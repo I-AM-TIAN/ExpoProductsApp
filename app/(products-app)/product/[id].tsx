@@ -1,6 +1,6 @@
 import ProductImages from "@/presentation/products/components/ProductImages";
 import { useProduct } from "@/presentation/products/hooks/useProduct";
-import ThemeButtonGroup from "@/presentation/theme/components/ThemeButtonGroup";
+import ThemedButtonGroup from "@/presentation/theme/components/ThemedButtonGroup";
 import ThemedTextInput from "@/presentation/theme/components/ThemedTextInput";
 import { ThemedView } from "@/presentation/theme/components/ThemedView";
 import { Ionicons } from "@expo/vector-icons";
@@ -78,10 +78,10 @@ const ProductScreen = () => {
         </ThemedView>
 
         <ThemedView style={{ marginHorizontal: 10 }}>
-          <ThemeButtonGroup
-            options={["Intercambio", "Venta", "Regalo"]}
-            selectedOptions={product.sizes}
-            onSelect={(options) => console.log({ options })}
+          <ThemedButtonGroup
+            options={['S', 'M', 'L', 'XL', 'XXL', 'XXXL']}
+            selectedOptions={product.sizes} 
+            onSelect={(option) => console.log(option)}
           />
         </ThemedView>
       </ScrollView>
