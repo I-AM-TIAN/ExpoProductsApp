@@ -1,7 +1,7 @@
 import { Product } from "@/core/products/interfaces/product.interface";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { FlatList, RefreshControl } from "react-native";
+import { FlatList, RefreshControl, View } from "react-native";
 import { ProductCard } from "./ProductCard";
 
 interface Props {
@@ -26,9 +26,11 @@ const ProductList = ({ products, loadNextPage }: Props) => {
   return (
     <FlatList
       data={products}
-      numColumns={2}
+      numColumns={1}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => <ProductCard product={item} />}
+      ItemSeparatorComponent={() => <View style={{ height: 10 }} />} // espacio neutro
+      contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
       onEndReached={loadNextPage}
       onEndReachedThreshold={0.8}
       showsVerticalScrollIndicator={false}

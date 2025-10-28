@@ -27,7 +27,6 @@ const CheckAutenticationLayout = () => {
     );
   }
   if (status === "unauthenticated") {
-    //guardar la ruta del usuario
     return <Redirect href="/auth/login" />;
   }
 
