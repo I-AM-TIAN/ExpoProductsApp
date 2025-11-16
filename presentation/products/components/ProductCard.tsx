@@ -13,8 +13,10 @@ export const ProductCard = ({ product }: Props) => {
   const onPress = () => router.push(`/product/${product.id}`);
 
   const hasImage = product.images?.length > 0;
-  const pillText = String((product as any).transactionType); // “undefined” visible
-  const locationLabel = String((product as any).location); // “undefined” visible
+  const pillText = product.modality?.name || "N/A";
+  const locationLabel = product.location
+    ? `${product.location.city}, ${product.location.state}`
+    : "N/A";
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
@@ -28,6 +30,7 @@ export const ProductCard = ({ product }: Props) => {
                 : require("../../../assets/images/no-product-image.png")
             }
             style={styles.thumb}
+            resizeMode="cover"
           />
         </View>
 
@@ -43,7 +46,7 @@ export const ProductCard = ({ product }: Props) => {
             style={styles.title}
             darkColor="#111827"
           >
-            {product.title}
+            {product.name}
           </ThemedText>
 
           <View style={styles.locationRow}>
@@ -75,7 +78,10 @@ const styles = StyleSheet.create({
     marginRight: 12,
     backgroundColor: "#F3F4F6",
   },
-  thumb: { width: "100%", height: "100%", resizeMode: "cover" },
+  thumb: { 
+    width: "100%", 
+    height: "100%",
+  },
 
   content: { flex: 1, justifyContent: "center" },
 

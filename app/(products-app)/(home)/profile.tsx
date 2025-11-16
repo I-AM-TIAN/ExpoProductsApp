@@ -1,28 +1,99 @@
+import { useProfile } from "@/presentation/auth/hooks/useProfile";
+import { useProfileImagePicker } from "@/presentation/auth/hooks/useProfileImagePicker";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    Image,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 const ProfileScreen = () => {
+  const { profile, isLoading, refetch } = useProfile();
+  const { showImagePickerOptions, isUploading } = useProfileImagePicker({
+    onSuccess: () => refetch(),
+  });
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size={30} />
+      </View>
+    );
+  }
+
+  // Valores por defecto
+  const userName = profile?.nombres || profile?.fullname || "Usuario";
+  const userLastName = profile?.apellidos || "";
+  const fullName = userLastName ? `${userName} ${userLastName}` : userName;
+  const ecopoints = profile?.ecopoints ?? 0;
+  const ecoStatus = profile?.ecoStatus || "Nuevo miembro";
+  const profileImage = profile?.profileImage;
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Header con avatar y nombre */}
       <View style={{ alignItems: "center", paddingVertical: 24 }}>
-        <View
-          style={{
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            backgroundColor: "#E91E63",
-            justifyContent: "center",
-            alignItems: "center",
-            marginBottom: 16,
-          }}
-        >
-          <Text style={{ fontSize: 40, color: "#fff" }}>👤</Text>
+        <View style={{ position: "relative" }}>
+          {profileImage ? (
+            <Image
+              source={{ uri: profileImage }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                marginBottom: 16,
+                backgroundColor: "#E5E7EB",
+              }}
+              resizeMode="cover"
+            />
+          ) : (
+            <View
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                backgroundColor: "#E91E63",
+                justifyContent: "center",
+                alignItems: "center",
+                marginBottom: 16,
+              }}
+            >
+              <Ionicons name="person" size={50} color="#fff" />
+            </View>
+          )}
+
+          {/* Botón de cámara */}
+          <TouchableOpacity
+            onPress={showImagePickerOptions}
+            disabled={isUploading}
+            style={{
+              position: "absolute",
+              bottom: 12,
+              right: 0,
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: "#5D8370",
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 3,
+              borderColor: "#fff",
+            }}
+          >
+            {isUploading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="camera" size={18} color="#fff" />
+            )}
+          </TouchableOpacity>
         </View>
 
         <Text style={{ fontSize: 24, fontWeight: "700", color: "#111827" }}>
-          Natalia
+          {fullName}
         </Text>
 
         <View
@@ -30,7 +101,7 @@ const ProfileScreen = () => {
         >
           <Ionicons name="star" size={16} color="#5D8370" />
           <Text style={{ marginLeft: 6, color: "#6B7280" }}>
-            1450 Ecopuntos
+            {ecopoints} Ecopuntos
           </Text>
         </View>
       </View>
@@ -92,7 +163,7 @@ const ProfileScreen = () => {
               color: "#111827",
             }}
           >
-            Embajador circular
+            {ecoStatus}
           </Text>
         </View>
       </View>

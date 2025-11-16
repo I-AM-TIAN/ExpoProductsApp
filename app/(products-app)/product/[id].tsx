@@ -9,13 +9,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect } from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 // ...existing code...
 
@@ -65,16 +65,18 @@ const ProductScreen = () => {
         <View style={styles.headerContainer}>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>
-              {product.transactionType ?? "undefined"}
+              {product.modality?.name ?? "N/A"}
             </Text>
           </View>
-          <Text style={styles.title}>{product.title}</Text>
+          <Text style={styles.title}>{product.name}</Text>
 
-          {/* Ubicación (fallback "undefined" si no viene del producto) */}
+          {/* Ubicación */}
           <View style={styles.row}>
             <Ionicons name="location-sharp" size={16} color={primary} />
             <Text style={styles.locationText}>
-              {product.location ?? "undefined"}
+              {product.location
+                ? `${product.location.city}, ${product.location.state}, ${product.location.country}`
+                : "N/A"}
             </Text>
           </View>
         </View>
@@ -84,16 +86,25 @@ const ProductScreen = () => {
           <Text style={styles.description}>{product.description ?? "-"}</Text>
         </View>
 
-        <ThemedView
-          style={{
-            marginHorizontal: 30,
-            marginVertical: 5,
-            flexDirection: "row",
-            gap: 10,
-          }}
-        >
-          <ThemedTextInput placeholder="Precio" style={{ flex: 1 }} />
-        </ThemedView>
+        {/* Mostrar precio solo si la modalidad es "Venta" */}
+        {product.modality?.name?.toLowerCase() === "venta" && (
+          <ThemedView
+            style={{
+              marginHorizontal: 30,
+              marginVertical: 5,
+              flexDirection: "row",
+              gap: 10,
+            }}
+          >
+            <ThemedTextInput 
+              placeholder="Precio" 
+              style={{ flex: 1 }} 
+              value={`$${product.price.toLocaleString()}`}
+              editable={false}
+            />
+          </ThemedView>
+        )}
+        
         <View style={{ width: "100%", marginTop: 10, paddingHorizontal: 30 }}>
           <ThemedButton onPress={() => {}} style={{ width: "100%" }}>
             Contactar

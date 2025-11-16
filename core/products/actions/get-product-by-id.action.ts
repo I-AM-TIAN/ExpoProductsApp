@@ -7,7 +7,14 @@ export const getProductById = async (id: string): Promise<Product> => {
 
     return {
       ...data,
-      images: data.images.map((image) => `${API_URL}/files/product/${image}`),
+      images: data.images.map((image) => {
+        // Si la imagen ya es una URL completa (http:// o https://), usarla directamente
+        if (image.startsWith('http://') || image.startsWith('https://')) {
+          return image;
+        }
+        // Si no, construir la URL con el API_URL
+        return `${API_URL}/files/product/${image}`;
+      }),
     };
   } catch (error) {
     console.log(error);
