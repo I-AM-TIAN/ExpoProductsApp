@@ -1,7 +1,9 @@
+import { router } from "expo-router";
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, useWindowDimensions, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, useWindowDimensions, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
+import { useAuthStore } from "@/presentation/auth/store/useAuthStore";
 import ThemedButton from "@/presentation/theme/components/ThemedButton";
 import ThemedLink from "@/presentation/theme/components/ThemedLink";
 import { ThemedText } from "@/presentation/theme/components/ThemedText";
@@ -11,6 +13,7 @@ import { useThemeColor } from "@/presentation/theme/hooks/useThemeColor";
 const RegisterScreen = () => {
   const { height } = useWindowDimensions();
   const backgroundColor = useThemeColor({}, "background");
+  const { register } = useAuthStore();
 
   const [form, setForm] = useState({
     firstName: "",
@@ -20,6 +23,44 @@ const RegisterScreen = () => {
     password: "",
     confirm: "",
   });
+  const [isPosting, setIsPosting] = useState(false);
+
+  const onRegister = async () => {
+    const { firstName, lastName, phone, email, password, confirm } = form;
+    
+    // Validaciones básicas
+    if (!firstName || !lastName || !phone || !email || !password || !confirm) {
+      Alert.alert("Error", "Todos los campos son obligatorios");
+      return;
+    }
+
+    if (password !== confirm) {
+      Alert.alert("Error", "Las contraseñas no coinciden");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    setIsPosting(true);
+    const ok = await register({
+      nombres: firstName,
+      apellidos: lastName,
+      telefono: phone,
+      email: email,
+      password: password,
+      confirmPassword: confirm,
+    });
+    setIsPosting(false);
+
+    if (ok) {
+      router.replace("/");
+      return;
+    }
+    Alert.alert("Error", "No se pudo completar el registro. Intenta de nuevo.");
+  };
 
   return (
     <KeyboardAvoidingView
@@ -105,7 +146,11 @@ const RegisterScreen = () => {
         </View>
 
         {/* Botón principal */}
-        <ThemedButton icon="arrow-forward-outline">
+        <ThemedButton 
+          icon="arrow-forward-outline"
+          onPress={onRegister}
+          disabled={isPosting}
+        >
           Registrarse
         </ThemedButton>
 
