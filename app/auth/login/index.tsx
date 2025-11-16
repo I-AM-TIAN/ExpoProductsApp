@@ -57,8 +57,8 @@ const LoginScreen = () => {
           <ThemedText
             type="title"
             style={{
-              fontSize: 36,     // más grande que 32
-              lineHeight: 44,   // respirar como en la maqueta
+              fontSize: 36, // más grande que 32
+              lineHeight: 44, // respirar como en la maqueta
               // fontFamily ya es "KanitBold" en type="title"
             }}
           >
@@ -113,7 +113,15 @@ const LoginScreen = () => {
           }}
         >
           <ThemedText>¿Aún no tienes cuenta?</ThemedText>
-          <ThemedLink href="/auth/register" style={{ marginTop: 2, marginLeft: 8, fontWeight: 'bold', textDecorationLine: 'underline' }}>
+          <ThemedLink
+            href="/auth/register"
+            style={{
+              marginTop: 2,
+              marginLeft: 8,
+              fontWeight: "bold",
+              textDecorationLine: "underline",
+            }}
+          >
             Crear cuenta
           </ThemedLink>
         </View>
