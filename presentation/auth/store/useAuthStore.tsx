@@ -1,4 +1,4 @@
-import { authCheckStatus, authLogin } from "@/core/auth/actions/auth-actions";
+import { authCheckStatus, authLogin, authRegister, type RegisterData } from "@/core/auth/actions/auth-actions";
 import { User } from "@/core/auth/interface/user";
 import { SecureStorageAdapter } from "@/helpers/adapters/secure-storage.adapter";
 
@@ -12,6 +12,7 @@ export interface AuthState {
   user?: User;
 
   login: (email: string, password: string) => Promise<boolean>;
+  register: (registerData: RegisterData) => Promise<boolean>;
   checkStatus: () => Promise<void>;
   logout: () => Promise<void>;
   changeStatus: (token?: string, user?: User) => Promise<boolean>;
@@ -42,8 +43,23 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   //Actions
   login: async (email: string, password: string) => {
-    const resp = await authLogin(email, password);
-    return get().changeStatus( resp?.token, resp?.user );
+    try {
+      const resp = await authLogin(email, password);
+      return get().changeStatus( resp?.token, resp?.user );
+    } catch (error) {
+      console.error('Error en login store:', error);
+      return false;
+    }
+  },
+
+  register: async (registerData: RegisterData) => {
+    try {
+      const resp = await authRegister(registerData);
+      return get().changeStatus( resp?.token, resp?.user );
+    } catch (error) {
+      console.error('Error en register store:', error);
+      return false;
+    }
   },
 
   checkStatus: async () => {

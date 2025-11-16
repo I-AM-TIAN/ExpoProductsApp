@@ -11,16 +11,7 @@ export interface AuthResponse {
 }
 
 const returnUserToken = (data: AuthResponse): { user: User; token: string } => {
-    //const {id, email, fullname, isActive, roles, token} = data;
     const { token, ...user } = data;
-
-    //const user: User = {
-    //    id,
-    //    email,
-    //    fullname,
-    //    isActive,
-    //    roles,
-    //}
 
     return { 
         user,
@@ -29,7 +20,15 @@ const returnUserToken = (data: AuthResponse): { user: User; token: string } => {
 };
 
 import axios from 'axios';
-// ...
+
+export interface RegisterData {
+  nombres: string;
+  apellidos: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  telefono: string;
+}
 
 export const authLogin = async (email: string, password: string) => {
   email = email.toLowerCase();
@@ -51,6 +50,33 @@ export const authLogin = async (email: string, password: string) => {
     }
     console.log('LOGIN ERROR (no-axios) →', err);
     throw new Error('Error al iniciar sesión');
+  }
+};
+
+export const authRegister = async (registerData: RegisterData) => {
+  const { email, ...restData } = registerData;
+  const normalizedEmail = email.toLowerCase();
+
+  try {
+    console.log('REGISTER → baseURL:', productsApi.defaults.baseURL, 'endpoint:', '/auth/register');
+    const { data } = await productsApi.post<AuthResponse>('/auth/register', {
+      ...restData,
+      email: normalizedEmail,
+    });
+    return returnUserToken(data);
+
+  } catch (err: any) {
+    if (axios.isAxiosError(err)) {
+      console.log('REGISTER ERROR →', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data,
+        url: (err.config?.baseURL || '') + (err.config?.url || ''),
+      });
+      throw new Error(err.response?.data?.message || `Fallo en registro (${err.response?.status ?? 'sin status'}).`);
+    }
+    console.log('REGISTER ERROR (no-axios) →', err);
+    throw new Error('Error al registrar usuario');
   }
 };
 
