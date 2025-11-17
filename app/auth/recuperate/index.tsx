@@ -1,4 +1,6 @@
+import { usePasswordRecovery } from "@/presentation/auth/hooks/usePasswordRecovery";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -14,23 +16,62 @@ import {
 
 const RecuperarScreen = () => {
   const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { loading, requestPasswordReset, validateEmail } = usePasswordRecovery();
+  const router = useRouter();
 
-  const handleSendEmail = () => {
+  const handleSendEmail = async () => {
     if (!email.trim()) {
       Alert.alert("Validación", "Por favor ingresa tu correo electrónico");
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert(
-        "Éxito",
-        "Te hemos enviado un mensaje para que puedas cambiar o recuperar tu contraseña"
-      );
+    if (!validateEmail(email)) {
+      Alert.alert("Validación", "Por favor ingresa un correo electrónico válido");
+      return;
+    }
+
+    try {
+      const response = await requestPasswordReset(email);
+      
+      // En desarrollo, si el backend devuelve el token, lo mostramos
+      if (response.token) {
+        Alert.alert(
+          "✅ Correo enviado",
+          `${response.message}\n\n🔧 MODO DESARROLLO:\nToken: ${response.token}\n\nUsa este token para restablecer tu contraseña.`,
+          [
+            {
+              text: "Continuar",
+              onPress: () => {
+                // Navegamos a la pantalla de reset con el token (solo en dev)
+                router.push({
+                  pathname: "/auth/reset-password" as any,
+                  params: { token: response.token },
+                });
+              },
+            },
+          ]
+        );
+      } else {
+        // En producción, solo mostramos el mensaje
+        Alert.alert(
+          "✅ Correo enviado",
+          response.message || "Te hemos enviado un correo con instrucciones para recuperar tu contraseña",
+          [
+            {
+              text: "Entendido",
+              onPress: () => router.back(),
+            },
+          ]
+        );
+      }
+      
       setEmail("");
-    }, 1500);
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.message || "No se pudo enviar el correo de recuperación"
+      );
+    }
   };
 
   return (
