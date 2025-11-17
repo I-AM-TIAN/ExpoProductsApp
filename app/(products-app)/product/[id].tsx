@@ -1,4 +1,6 @@
 // ...existing code...
+import { useAuthStore } from "@/presentation/auth/store/useAuthStore";
+import { useCreateConversation } from "@/presentation/chat/hooks/useCreateConversation";
 import ProductImages from "@/presentation/products/components/ProductImages";
 import { useProduct } from "@/presentation/products/hooks/useProduct";
 import ThemedButton from "@/presentation/theme/components/ThemedButton";
@@ -6,7 +8,7 @@ import ThemedTextInput from "@/presentation/theme/components/ThemedTextInput";
 import { ThemedView } from "@/presentation/theme/components/ThemedView";
 import { useThemeColor } from "@/presentation/theme/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, useLocalSearchParams, useNavigation } from "expo-router";
+import { Redirect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
   ActivityIndicator,
@@ -23,8 +25,11 @@ import {
 const ProductScreen = () => {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
+  const router = useRouter();
 
   const { productQuery } = useProduct(`${id}`);
+  const { createOrGetConversation, loading: creatingConversation } = useCreateConversation();
+  const { user } = useAuthStore();
 
   const primary = useThemeColor({}, "primary");
   useEffect(() => {
@@ -54,6 +59,42 @@ const ProductScreen = () => {
   }
 
   const product = productQuery.data!;
+
+  const handleContactSeller = async () => {
+    if (!user || !product.user) {
+      alert("Debes iniciar sesión para contactar al vendedor");
+      return;
+    }
+
+    if (user.id === product.user.id) {
+      alert("No puedes contactarte a ti mismo");
+      return;
+    }
+
+    try {
+      console.log("📞 Creando conversación con:", product.user.id);
+      
+      const conversation = await createOrGetConversation({
+        otherUserId: product.user.id,
+        productId: product.id,
+      });
+
+      console.log("✅ Conversación creada:", conversation.id);
+
+      // Navegar al chat
+      router.push({
+        pathname: "/(products-app)/chat/[id]",
+        params: {
+          id: conversation.id,
+          otherUserName: `${product.user.nombres} ${product.user.apellidos}`,
+          productName: product.name,
+        },
+      });
+    } catch (error: any) {
+      console.error("❌ Error creando conversación:", error);
+      alert(`Error al crear la conversación: ${error.message || 'Desconocido'}`);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -129,8 +170,12 @@ const ProductScreen = () => {
         )}
 
         <View style={{ width: "100%", marginTop: 10, paddingHorizontal: 30 }}>
-          <ThemedButton onPress={() => {}} style={{ width: "100%" }}>
-            Contactar
+          <ThemedButton 
+            onPress={handleContactSeller} 
+            style={{ width: "100%" }}
+            disabled={creatingConversation}
+          >
+            {creatingConversation ? "Conectando..." : "Contactar"}
           </ThemedButton>
         </View>
       </ScrollView>
