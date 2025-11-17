@@ -1,9 +1,9 @@
 // Imports: librerías externas, hooks, componentes
+import { pickImageFromGallery, takePhoto as takePhotoHelper } from "@/helpers/image-picker.helper";
 import { useCreateProduct } from "@/presentation/products/hooks/useCreateProduct";
 import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   Image,
@@ -31,39 +31,29 @@ const SettingsScreen = () => {
   const [price, setPrice] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
-  useEffect(() => {
-    (async () => {
-      if (Platform.OS !== "web") {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          Alert.alert(
-            "Permiso denegado",
-            "Necesitamos acceso a la galería para subir imágenes."
-          );
-        }
-      }
-    })();
-  }, []);
-
   const pickImage = async () => {
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.6,
-      });
-
-      const uri =
-        // @ts-ignore
-        result?.assets?.[0]?.uri ?? // nuevas versiones
-        // @ts-ignore
-        result?.uri; // versiones antiguas
-
-      if (uri) {
-        setImages((prev) => [uri, ...prev].slice(0, 6));
+      // Usar helper para obtener imagen en base64
+      const base64Image = await pickImageFromGallery();
+      
+      if (base64Image) {
+        setImages((prev) => [base64Image, ...prev].slice(0, 6));
       }
     } catch (error) {
       console.error("pickImage error:", error);
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      // Usar helper para tomar foto en base64
+      const base64Image = await takePhotoHelper();
+      
+      if (base64Image) {
+        setImages((prev) => [base64Image, ...prev].slice(0, 6));
+      }
+    } catch (error) {
+      console.error("takePhoto error:", error);
     }
   };
 
@@ -156,7 +146,7 @@ const SettingsScreen = () => {
             <Text style={styles.galleryLabel}>Galería</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
+          <TouchableOpacity style={styles.galleryButton} onPress={takePhoto}>
             <Ionicons name="camera" size={22} color="#666" />
             <Text style={styles.galleryLabel}>Cámara</Text>
           </TouchableOpacity>

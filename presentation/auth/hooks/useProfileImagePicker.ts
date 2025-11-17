@@ -1,6 +1,7 @@
 import { updateProfileImage } from '@/core/auth/actions/profile-actions';
+import { pickImageFromGallery, takePhoto as takePhotoHelper } from '@/helpers/image-picker.helper';
 import { useAuthStore } from '@/presentation/auth/store/useAuthStore';
-import * as ImagePicker from 'expo-image-picker';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Alert } from 'react-native';
 
@@ -11,50 +12,28 @@ interface UseProfileImagePickerProps {
 export const useProfileImagePicker = (props?: UseProfileImagePickerProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const updateUser = useAuthStore((state) => state.updateUser);
-
-  const requestPermissions = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permisos necesarios',
-        'Necesitamos acceso a tu galería para cambiar tu foto de perfil.',
-        [{ text: 'OK' }]
-      );
-      return false;
-    }
-    
-    return true;
-  };
+  const queryClient = useQueryClient();
 
   const pickImage = async () => {
     try {
-      // Solicitar permisos
-      const hasPermission = await requestPermissions();
-      if (!hasPermission) return;
+      setIsUploading(true);
 
-      // Abrir selector de imágenes
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (result.canceled) {
+      // Usar el helper para seleccionar imagen (ya maneja permisos y conversión a base64)
+      const base64Image = await pickImageFromGallery();
+      
+      if (!base64Image) {
+        setIsUploading(false);
         return;
       }
 
-      setIsUploading(true);
-
-      // Obtener la URL de la imagen seleccionada
-      const imageUrl = result.assets[0].uri;
-
-      // Enviar directamente al backend (el backend maneja el almacenamiento)
-      const updatedUser = await updateProfileImage(imageUrl);
+      // Subir imagen al backend (que la subirá a ImageKit)
+      const updatedUser = await updateProfileImage(base64Image);
 
       // Actualizar en el store local
       updateUser(updatedUser);
+
+      // Invalidar caché de perfil para que se refresque en toda la app
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
 
       // Llamar callback de éxito si existe
       props?.onSuccess?.();
@@ -73,39 +52,24 @@ export const useProfileImagePicker = (props?: UseProfileImagePickerProps) => {
 
   const takePhoto = async () => {
     try {
-      // Solicitar permisos de cámara
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permisos necesarios',
-          'Necesitamos acceso a tu cámara para tomar una foto.',
-          [{ text: 'OK' }]
-        );
-        return;
-      }
-
-      // Abrir cámara
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      if (result.canceled) {
-        return;
-      }
-
       setIsUploading(true);
 
-      // Obtener la URL de la foto tomada
-      const imageUrl = result.assets[0].uri;
+      // Usar el helper para tomar foto (ya maneja permisos y conversión a base64)
+      const base64Image = await takePhotoHelper();
+      
+      if (!base64Image) {
+        setIsUploading(false);
+        return;
+      }
 
-      // Enviar directamente al backend (el backend maneja el almacenamiento)
-      const updatedUser = await updateProfileImage(imageUrl);
+      // Subir imagen al backend (que la subirá a ImageKit)
+      const updatedUser = await updateProfileImage(base64Image);
 
       // Actualizar en el store local
       updateUser(updatedUser);
+
+      // Invalidar caché de perfil para que se refresque en toda la app
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
 
       // Llamar callback de éxito si existe
       props?.onSuccess?.();

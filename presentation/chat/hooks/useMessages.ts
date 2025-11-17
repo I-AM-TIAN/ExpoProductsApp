@@ -30,7 +30,15 @@ export const useMessages = (conversationId: string) => {
   }, [conversationId]);
 
   const addMessage = (message: Message) => {
-    setMessages((prev) => [...prev, message]);
+    setMessages((prev) => {
+      // Verificar si el mensaje ya existe para evitar duplicados
+      const exists = prev.some(msg => msg.id === message.id);
+      if (exists) {
+        console.log("⚠️ Mensaje duplicado detectado, ignorando:", message.id);
+        return prev;
+      }
+      return [...prev, message];
+    });
   };
 
   const markMessagesAsRead = () => {

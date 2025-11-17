@@ -58,9 +58,12 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({
         </View>
 
         {product && (
-          <Text style={styles.productName} numberOfLines={1}>
-            📦 {product.name}
-          </Text>
+          <View style={styles.productBadge}>
+            <Text style={styles.productIcon}>📦</Text>
+            <Text style={styles.productName} numberOfLines={1}>
+              {product.name}
+            </Text>
+          </View>
         )}
 
         <View style={styles.footer}>
@@ -121,6 +124,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6B7280",
     marginBottom: 4,
+  },
+  productBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 4,
+    alignSelf: "flex-start",
+  },
+  productIcon: {
+    fontSize: 12,
+    marginRight: 4,
   },
   footer: {
     flexDirection: "row",

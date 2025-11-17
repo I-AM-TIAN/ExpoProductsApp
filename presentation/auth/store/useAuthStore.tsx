@@ -26,12 +26,18 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   user: undefined,
 
   changeStatus: async (token?: string, user?: User) => {
+    const currentUserId = get().user?.id;
+    const newUserId = user?.id;
+    
     if(!token || !user) {
       set({ status: 'unauthenticated', user: undefined, token: undefined });
       await SecureStorageAdapter.deleteItem('token');
       return false;
     }
 
+    // Si el usuario cambió, necesitamos limpiar el caché
+    // (esto se maneja desde los componentes con queryClient.clear())
+    
     set({
       status: 'authenticated',
       user: user,

@@ -6,6 +6,8 @@ export const useProfile = () => {
     queryKey: ["profile"],
     queryFn: getProfile,
     staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchOnWindowFocus: true, // Refrescar cuando vuelve a la app
+    refetchOnMount: true, // Refrescar al montar el componente
   });
 
   return {

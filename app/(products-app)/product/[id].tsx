@@ -12,6 +12,7 @@ import { Redirect, useLocalSearchParams, useNavigation, useRouter } from "expo-r
 import { useEffect } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -67,14 +68,18 @@ const ProductScreen = () => {
     }
 
     try {
-      console.log("📞 Creando conversación con:", product.user.id);
+      console.log("📞 Creando conversación con:", product.user.id, "para producto:", product.id);
       
+      // Siempre incluye productId - el backend creará conversaciones separadas por producto
       const conversation = await createOrGetConversation({
         otherUserId: product.user.id,
         productId: product.id,
       });
 
-      console.log("✅ Conversación creada:", conversation.id);
+      console.log("✅ Conversación obtenida:", conversation.id);
+
+      // Detectar si es conversación existente (ya tiene mensajes)
+      const isExistingConversation = conversation.lastMessage != null;
 
       // Navegar al chat
       router.push({
@@ -82,12 +87,18 @@ const ProductScreen = () => {
         params: {
           id: conversation.id,
           otherUserName: `${product.user.nombres} ${product.user.apellidos}`,
+          // Solo enviar mensaje inicial si es conversación nueva
+          initialMessage: isExistingConversation 
+            ? undefined 
+            : `Hola, estoy interesado en este producto: ${product.name}`,
+          productId: product.id,
           productName: product.name,
+          productImage: product.images && product.images.length > 0 ? product.images[0] : undefined,
         },
       });
     } catch (error: any) {
       console.error("❌ Error creando conversación:", error);
-      alert(`Error al crear la conversación: ${error.message || 'Desconocido'}`);
+      Alert.alert("Error", `No se pudo crear la conversación: ${error.message || 'Desconocido'}`);
     }
   };
 

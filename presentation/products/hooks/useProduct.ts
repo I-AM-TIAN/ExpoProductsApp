@@ -6,7 +6,9 @@ export const useProduct = (productId: string) => {
     const productQuery = useQuery({
     queryKey: ['product', productId],
     queryFn: () => getProductById(productId),
-    staleTime: 1000 * 60 * 60, // 1 hora
+    staleTime: 1000 * 60 * 5, // Reducido a 5 minutos
+    refetchOnWindowFocus: true, // Refrescar cuando vuelve a la app
+    refetchOnMount: true, // Refrescar al montar el componente
     })
 
     //mutación

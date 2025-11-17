@@ -4,20 +4,22 @@ import ThemedLink from "@/presentation/theme/components/ThemedLink";
 import { ThemedText } from "@/presentation/theme/components/ThemedText";
 import ThemedTextInput from "@/presentation/theme/components/ThemedTextInput";
 import { useThemeColor } from "@/presentation/theme/hooks/useThemeColor";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useState } from "react";
 
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  useWindowDimensions,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    useWindowDimensions,
+    View,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 const LoginScreen = () => {
   const { login } = useAuthStore();
+  const queryClient = useQueryClient();
   const { height } = useWindowDimensions();
   const backgroundColor = useThemeColor({}, "background");
 
@@ -29,6 +31,10 @@ const LoginScreen = () => {
     if (!email || !password) return;
 
     setIsPosting(true);
+    
+    // Limpiar todo el caché antes de iniciar sesión con otro usuario
+    queryClient.clear();
+    
     const ok = await login(email, password);
     setIsPosting(false);
 

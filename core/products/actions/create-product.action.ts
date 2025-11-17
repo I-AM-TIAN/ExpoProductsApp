@@ -6,20 +6,27 @@ import {
 
 /**
  * Crea un nuevo producto
- * @param productData - Datos del producto a crear
+ * @param productData - Datos del producto a crear (con imágenes en base64)
  * @returns Producto creado con toda su información
  */
 export const createProductAction = async (
   productData: CreateProductDto
 ): Promise<CreateProductResponse> => {
   try {
+    // Enviar datos directamente - el backend espera las imágenes en base64
     const { data } = await productsApi.post<CreateProductResponse>(
       '/products',
-      productData
+      {
+        name: productData.name,
+        description: productData.description,
+        location: productData.location,
+        modality: productData.modality,
+        price: productData.price,
+        tags: productData.tags,
+        images: productData.images, // Array de strings base64
+      }
     );
 
-    // El backend ya retorna las imágenes en el formato correcto
-    // No necesitamos transformarlas
     return data;
   } catch (error: any) {
     // Manejo de errores específicos del backend

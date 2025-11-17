@@ -33,4 +33,5 @@ export interface ConversationProduct {
 export interface CreateConversationDto {
   otherUserId: string;
   productId?: string;
+  initialMessage?: string; // Mensaje inicial opcional
 }

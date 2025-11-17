@@ -48,7 +48,9 @@ const MessagesScreen = () => {
                 params: {
                   id: item.id,
                   otherUserName: `${item.otherUser?.nombres} ${item.otherUser?.apellidos}`,
+                  productId: item.product?.id || "",
                   productName: item.product?.name || "",
+                  productImage: item.product?.images?.[0] || "",
                 },
               });
             }}

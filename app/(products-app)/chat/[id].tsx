@@ -1,6 +1,8 @@
 import { useAuthStore } from "@/presentation/auth/store/useAuthStore";
 import { ChatInput } from "@/presentation/chat/components/ChatInput";
 import { MessageBubble } from "@/presentation/chat/components/MessageBubble";
+import { ProductMessageCard } from "@/presentation/chat/components/ProductMessageCard";
+import { useConversation } from "@/presentation/chat/hooks/useConversation";
 import { useMessages } from "@/presentation/chat/hooks/useMessages";
 import { useSocket } from "@/presentation/chat/hooks/useSocket";
 import { useLocalSearchParams } from "expo-router";
@@ -16,14 +18,27 @@ import {
 } from "react-native";
 
 const ChatScreen = () => {
-  const { id: conversationId, otherUserName, productName } = useLocalSearchParams<{
+  const { 
+    id: conversationId, 
+    otherUserName, 
+    initialMessage,
+    productId,
+    productName,
+    productImage,
+  } = useLocalSearchParams<{
     id: string;
     otherUserName: string;
-    productName: string;
+    initialMessage?: string;
+    productId?: string;
+    productName?: string;
+    productImage?: string;
   }>();
 
   const { user: authUser } = useAuthStore();
   const user = (authUser as any)?.user || authUser; // Manejar estructura anidada
+  
+  // Obtener información de la conversación (incluyendo producto)
+  const { conversation } = useConversation(conversationId!);
   
   // Debug: verificar usuario
   useEffect(() => {
@@ -48,6 +63,7 @@ const ChatScreen = () => {
 
   const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [initialMessageSent, setInitialMessageSent] = useState(false);
   const flatListRef = React.useRef<FlatList>(null);
 
   useEffect(() => {
@@ -116,6 +132,31 @@ const ChatScreen = () => {
     };
   }, [isConnected, conversationId, user]);
 
+  // Efecto separado para enviar mensaje inicial después de cargar
+  useEffect(() => {
+    if (
+      isConnected &&
+      conversationId &&
+      user &&
+      !isLoading &&
+      initialMessage &&
+      !initialMessageSent &&
+      messages.length === 0
+    ) {
+      console.log("📤 Enviando mensaje inicial:", initialMessage);
+      const timeout = setTimeout(() => {
+        sendMessage({
+          conversationId,
+          message: initialMessage,
+          senderId: user.id,
+        });
+        setInitialMessageSent(true);
+      }, 800); // Esperar a que el socket esté completamente listo
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isConnected, conversationId, user, isLoading, initialMessage, initialMessageSent, messages.length]);
+
   const handleSend = (message: string) => {
     if (!user || !conversationId) return;
 
@@ -167,23 +208,39 @@ const ChatScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      {/* Información del producto (opcional) */}
-      {productName && (
-        <View style={styles.productBanner}>
-          <Text style={styles.productText} numberOfLines={1}>
-            📦 {productName}
-          </Text>
-        </View>
-      )}
-
       {/* Lista de mensajes */}
       <FlatList
         ref={flatListRef}
         data={messages}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <MessageBubble message={item} isOwn={item.senderId === user?.id} />
-        )}
+        renderItem={({ item, index }) => {
+          // Detectar si es un mensaje de producto
+          const isProductMessage = 
+            item.content?.includes("Hola, estoy interesado en este producto") ||
+            item.content?.includes("Hola, también estoy interesado en este producto");
+
+          // Si es el primer mensaje y es un mensaje de producto
+          const isFirstMessage = index === 0;
+          
+          if (isFirstMessage && isProductMessage && conversation?.product) {
+            return (
+              <ProductMessageCard
+                productId={conversation.product.id}
+                productName={conversation.product.name}
+                productImage={
+                  conversation.product.images && conversation.product.images.length > 0
+                    ? conversation.product.images[0]
+                    : undefined
+                }
+                isOwn={item.senderId === user?.id}
+              />
+            );
+          }
+
+          return (
+            <MessageBubble message={item} isOwn={item.senderId === user?.id} />
+          );
+        }}
         contentContainerStyle={styles.messagesList}
         onContentSizeChange={() =>
           flatListRef.current?.scrollToEnd({ animated: true })
@@ -233,18 +290,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-  },
-  productBanner: {
-    backgroundColor: "#F3F4F6",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
-  },
-  productText: {
-    fontSize: 14,
-    color: "#6B7280",
-    textAlign: "center",
   },
   messagesList: {
     paddingVertical: 16,
