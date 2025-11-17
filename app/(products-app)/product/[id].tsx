@@ -32,11 +32,6 @@ const ProductScreen = () => {
   const { user } = useAuthStore();
 
   const primary = useThemeColor({}, "primary");
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <Ionicons name="camera-outline" size={24} />,
-    });
-  }, []);
 
   useEffect(() => {
     if (productQuery.data) {
