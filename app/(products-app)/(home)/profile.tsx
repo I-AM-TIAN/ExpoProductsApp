@@ -1,14 +1,15 @@
 import { useProfile } from "@/presentation/auth/hooks/useProfile";
 import { useProfileImagePicker } from "@/presentation/auth/hooks/useProfileImagePicker";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const ProfileScreen = () => {
@@ -16,6 +17,8 @@ const ProfileScreen = () => {
   const { showImagePickerOptions, isUploading } = useProfileImagePicker({
     onSuccess: () => refetch(),
   });
+
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -106,7 +109,7 @@ const ProfileScreen = () => {
         </View>
       </View>
 
-      {/* Mis intercambios */}
+      {/* Mis publicaciones */}
       <TouchableOpacity
         style={{
           marginHorizontal: 16,
@@ -117,14 +120,15 @@ const ProfileScreen = () => {
           justifyContent: "space-between",
           alignItems: "center",
         }}
+        onPress={() => router.push("/publicaciones")} // -> /historial/index.tsx
       >
         <Text style={{ fontSize: 16, fontWeight: "600", color: "#111827" }}>
-          Mis intercambios
+          Mis publicaciones
         </Text>
         <Ionicons name="chevron-forward" size={24} color="#6B7280" />
       </TouchableOpacity>
 
-      {/* Mis donaciones */}
+      {/* Mi información */}
       <TouchableOpacity
         style={{
           marginHorizontal: 16,
@@ -135,9 +139,10 @@ const ProfileScreen = () => {
           justifyContent: "space-between",
           alignItems: "center",
         }}
+        onPress={() => router.push("/information")} // -> /historial/index.tsx
       >
         <Text style={{ fontSize: 16, fontWeight: "600", color: "#111827" }}>
-          Mis donaciones
+          Mi información
         </Text>
         <Ionicons name="chevron-forward" size={24} color="#6B7280" />
       </TouchableOpacity>

@@ -59,7 +59,7 @@ const CheckAutenticationLayout = () => {
         <Stack.Screen
           name="(home)/index"
           options={{
-            title: "Productos",
+            title: "Inicio",
             headerLeft: () => <LogoutIconButton />,
             headerShown: true,
           }}
@@ -84,7 +84,7 @@ const CheckAutenticationLayout = () => {
         <Stack.Screen
           name="(home)/shoppingcart"
           options={{
-            title: "Carrito",
+            title: "Productos",
             headerShown: true,
           }}
         />
@@ -101,6 +101,22 @@ const CheckAutenticationLayout = () => {
           name="product/[id]"
           options={{
             title: "Productos",
+            headerShown: true,
+          }}
+        />
+
+        <Stack.Screen
+          name="(home)/information/index"
+          options={{
+            title: "",
+            headerShown: true,
+          }}
+        />
+
+        <Stack.Screen
+          name="(home)/publicaciones/index"
+          options={{
+            title: "",
             headerShown: true,
           }}
         />
