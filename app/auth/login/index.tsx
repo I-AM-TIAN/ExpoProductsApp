@@ -87,7 +87,17 @@ const LoginScreen = () => {
 
           {/* Link "Olvidé mi contraseña" alineado a la derecha */}
           <View style={{ alignItems: "flex-end" }}>
-            <ThemedLink href="/">Olvidé mi contraseña</ThemedLink>
+            <ThemedLink
+              href="/auth/recuperate"
+              style={{
+                marginTop: 2,
+                marginLeft: 8,
+                fontWeight: "bold",
+                textDecorationLine: "underline",
+              }}
+            >
+              Olvidé mi contraseña
+            </ThemedLink>
           </View>
         </View>
 

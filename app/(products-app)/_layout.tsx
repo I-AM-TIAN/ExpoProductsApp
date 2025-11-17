@@ -144,11 +144,11 @@ const CheckAutenticationLayout = () => {
         <View style={{ flex: 1, alignItems: "center" }}>
           <TouchableOpacity
             style={{ alignItems: "center" }}
-            onPress={() => router.push("/(products-app)/(home)/profile")}
+            onPress={() => router.push("/(products-app)/(home)/shoppingcart")}
           >
-            <Ionicons name="person-outline" size={24} color="gray" />
+            <Ionicons name="cart-outline" size={24} color="gray" />
             <Text style={{ color: "gray", fontSize: 12, marginTop: 4 }}>
-              Perfil
+              Carrito
             </Text>
           </TouchableOpacity>
         </View>
@@ -173,11 +173,11 @@ const CheckAutenticationLayout = () => {
         <View style={{ flex: 1, alignItems: "center" }}>
           <TouchableOpacity
             style={{ alignItems: "center" }}
-            onPress={() => router.push("/(products-app)/(home)/shoppingcart")}
+            onPress={() => router.push("/(products-app)/(home)/messages")}
           >
-            <Ionicons name="cart-outline" size={24} color="gray" />
+            <Ionicons name="chatbubble-outline" size={24} color="gray" />
             <Text style={{ color: "gray", fontSize: 12, marginTop: 4 }}>
-              Carrito
+              Mensajes
             </Text>
           </TouchableOpacity>
         </View>
@@ -185,11 +185,11 @@ const CheckAutenticationLayout = () => {
         <View style={{ flex: 1, alignItems: "center" }}>
           <TouchableOpacity
             style={{ alignItems: "center" }}
-            onPress={() => router.push("/(products-app)/(home)/messages")}
+            onPress={() => router.push("/(products-app)/(home)/profile")}
           >
-            <Ionicons name="chatbubble-outline" size={24} color="gray" />
+            <Ionicons name="person-outline" size={24} color="gray" />
             <Text style={{ color: "gray", fontSize: 12, marginTop: 4 }}>
-              Mensajes
+              Perfil
             </Text>
           </TouchableOpacity>
         </View>

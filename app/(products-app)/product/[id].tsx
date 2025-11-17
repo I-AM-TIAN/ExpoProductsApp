@@ -9,13 +9,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 // ...existing code...
 
@@ -96,15 +96,15 @@ const ProductScreen = () => {
               gap: 10,
             }}
           >
-            <ThemedTextInput 
-              placeholder="Precio" 
-              style={{ flex: 1 }} 
+            <ThemedTextInput
+              placeholder="Precio"
+              style={{ flex: 1 }}
               value={`$${product.price.toLocaleString()}`}
               editable={false}
             />
           </ThemedView>
         )}
-        
+
         <View style={{ width: "100%", marginTop: 10, paddingHorizontal: 30 }}>
           <ThemedButton onPress={() => {}} style={{ width: "100%" }}>
             Contactar
