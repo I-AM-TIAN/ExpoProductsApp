@@ -112,11 +112,7 @@ const LoginScreen = () => {
 
         {/* Botón principal (ancho controlado por contenedor) */}
         <View style={{ width: "100%", marginTop: 20 }}>
-          <ThemedButton
-            icon="log-in-outline"
-            onPress={onLogin}
-            disabled={isPosting}
-          >
+          <ThemedButton onPress={onLogin} disabled={isPosting}>
             Iniciar sesión
           </ThemedButton>
         </View>
