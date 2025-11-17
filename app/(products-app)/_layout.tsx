@@ -162,9 +162,9 @@ const CheckAutenticationLayout = () => {
             style={{ alignItems: "center" }}
             onPress={() => router.push("/(products-app)/(home)/shoppingcart")}
           >
-            <Ionicons name="cart-outline" size={24} color="gray" />
+            <Ionicons name="bag-handle-outline" size={24} color="gray" />
             <Text style={{ color: "gray", fontSize: 12, marginTop: 4 }}>
-              Carrito
+              Productos
             </Text>
           </TouchableOpacity>
         </View>

@@ -59,7 +59,7 @@ const ProfileScreen = () => {
                 width: 100,
                 height: 100,
                 borderRadius: 50,
-                backgroundColor: "#E91E63",
+                backgroundColor: "#5D8370",
                 justifyContent: "center",
                 alignItems: "center",
                 marginBottom: 16,
@@ -120,7 +120,7 @@ const ProfileScreen = () => {
           justifyContent: "space-between",
           alignItems: "center",
         }}
-        onPress={() => router.push("/publicaciones")} // -> /historial/index.tsx
+        onPress={() => router.push("/publicaciones")}
       >
         <Text style={{ fontSize: 16, fontWeight: "600", color: "#111827" }}>
           Mis publicaciones
@@ -139,7 +139,7 @@ const ProfileScreen = () => {
           justifyContent: "space-between",
           alignItems: "center",
         }}
-        onPress={() => router.push("/information")} // -> /historial/index.tsx
+        onPress={() => router.push("/information")}
       >
         <Text style={{ fontSize: 16, fontWeight: "600", color: "#111827" }}>
           Mi información
@@ -173,20 +173,121 @@ const ProfileScreen = () => {
         </View>
       </View>
 
-      {/* Mapa */}
-      <View style={{ marginHorizontal: 16, marginTop: 24, marginBottom: 100 }}>
+      {/* Bloque de consejos ReUse (reemplaza al mapa) */}
+      <View
+        style={{
+          marginHorizontal: 16,
+          marginTop: 10,
+          marginBottom: 100,
+        }}
+      >
+        <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 8 }}>
+          Consejos ReUse
+        </Text>
+
         <View
           style={{
-            width: "100%",
-            height: 200,
-            backgroundColor: "#E0E0E0",
             borderRadius: 12,
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
+            backgroundColor: "#F9FAFB",
+            padding: 14,
           }}
         >
-          <Text style={{ color: "#999" }}>Mapa aquí</Text>
+          {/* Fila 1 */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#E5F3EB",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: 10,
+              }}
+            >
+              <Ionicons
+                name="swap-horizontal-outline"
+                size={18}
+                color="#4B7B63"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: 14, fontWeight: "600", color: "#111827" }}
+              >
+                Intercambia antes de comprar
+              </Text>
+              <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                Publica lo que no usas y cámbialo por algo que sí necesitas.
+              </Text>
+            </View>
+          </View>
+
+          {/* Fila 2 */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#E5F3EB",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: 10,
+              }}
+            >
+              <Ionicons name="heart-outline" size={18} color="#4B7B63" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: 14, fontWeight: "600", color: "#111827" }}
+              >
+                Dona cuando puedas
+              </Text>
+              <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                Lo que ya no usas puede ser de gran ayuda para otra persona.
+              </Text>
+            </View>
+          </View>
+
+          {/* Fila 3 */}
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#E5F3EB",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: 10,
+              }}
+            >
+              <Ionicons name="bag-handle-outline" size={18} color="#4B7B63" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{ fontSize: 14, fontWeight: "600", color: "#111827" }}
+              >
+                Prefiere productos usados
+              </Text>
+              <Text style={{ fontSize: 12, color: "#6B7280", marginTop: 2 }}>
+                Ahorras dinero, reduces residuos y aumentas tus Ecopuntos.
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
     </ScrollView>

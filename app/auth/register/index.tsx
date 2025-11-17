@@ -1,6 +1,12 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, useWindowDimensions, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
 import { useAuthStore } from "@/presentation/auth/store/useAuthStore";
@@ -27,7 +33,7 @@ const RegisterScreen = () => {
 
   const onRegister = async () => {
     const { firstName, lastName, phone, email, password, confirm } = form;
-    
+
     // Validaciones básicas
     if (!firstName || !lastName || !phone || !email || !password || !confirm) {
       Alert.alert("Error", "Todos los campos son obligatorios");
@@ -137,20 +143,21 @@ const RegisterScreen = () => {
 
         {/* Términos */}
         <View style={{ marginTop: 10, marginBottom: 14 }}>
-          <ThemedText style={{fontSize: 12, lineHeight: 18 }}>
-            Al hacer clic en el botón <ThemedText style={{ fontWeight: "bold", fontSize: 14 }}>Registrarse</ThemedText>, aceptas los{" "}
+          <ThemedText style={{ fontSize: 12, lineHeight: 18 }}>
+            Al hacer clic en el botón{" "}
+            <ThemedText style={{ fontWeight: "bold", fontSize: 14 }}>
+              Registrarse
+            </ThemedText>
+            , aceptas los{" "}
             <ThemedLink href="/" style={{ fontSize: 12 }}>
               términos de uso
-            </ThemedLink>.
+            </ThemedLink>
+            .
           </ThemedText>
         </View>
 
         {/* Botón principal */}
-        <ThemedButton 
-          icon="arrow-forward-outline"
-          onPress={onRegister}
-          disabled={isPosting}
-        >
+        <ThemedButton onPress={onRegister} disabled={isPosting}>
           Registrarse
         </ThemedButton>
 

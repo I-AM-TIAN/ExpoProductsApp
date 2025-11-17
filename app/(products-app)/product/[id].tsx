@@ -8,7 +8,12 @@ import ThemedTextInput from "@/presentation/theme/components/ThemedTextInput";
 import { ThemedView } from "@/presentation/theme/components/ThemedView";
 import { useThemeColor } from "@/presentation/theme/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
-import { Redirect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import {
+  Redirect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
 import { useEffect } from "react";
 import {
   ActivityIndicator,
@@ -18,7 +23,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 // ...existing code...
 
@@ -28,7 +33,8 @@ const ProductScreen = () => {
   const router = useRouter();
 
   const { productQuery } = useProduct(`${id}`);
-  const { createOrGetConversation, loading: creatingConversation } = useCreateConversation();
+  const { createOrGetConversation, loading: creatingConversation } =
+    useCreateConversation();
   const { user } = useAuthStore();
 
   const primary = useThemeColor({}, "primary");
@@ -67,16 +73,15 @@ const ProductScreen = () => {
     }
 
     try {
-      console.log("📞 Creando conversación con:", product.user.id);
-      
+      console.log("Creando conversación con:", product.user.id);
+
       const conversation = await createOrGetConversation({
         otherUserId: product.user.id,
         productId: product.id,
       });
 
-      console.log("✅ Conversación creada:", conversation.id);
+      console.log("Conversación creada:", conversation.id);
 
-      // Navegar al chat
       router.push({
         pathname: "/(products-app)/chat/[id]",
         params: {
@@ -86,8 +91,10 @@ const ProductScreen = () => {
         },
       });
     } catch (error: any) {
-      console.error("❌ Error creando conversación:", error);
-      alert(`Error al crear la conversación: ${error.message || 'Desconocido'}`);
+      console.error("Error creando conversación:", error);
+      alert(
+        `Error al crear la conversación: ${error.message || "Desconocido"}`
+      );
     }
   };
 
@@ -165,8 +172,8 @@ const ProductScreen = () => {
         )}
 
         <View style={{ width: "100%", marginTop: 10, paddingHorizontal: 30 }}>
-          <ThemedButton 
-            onPress={handleContactSeller} 
+          <ThemedButton
+            onPress={handleContactSeller}
             style={{ width: "100%" }}
             disabled={creatingConversation}
           >
