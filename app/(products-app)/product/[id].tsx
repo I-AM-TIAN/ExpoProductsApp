@@ -10,12 +10,13 @@ import { Redirect, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect } from "react";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 // ...existing code...
 
@@ -105,6 +106,28 @@ const ProductScreen = () => {
           </ThemedView>
         )}
 
+        {/* Información del vendedor */}
+        {product.user && (
+          <View style={styles.sellerContainer}>
+            <Text style={styles.sellerTitle}>Publicado por</Text>
+            <View style={styles.sellerInfo}>
+              <Image
+                source={{
+                  uri:
+                    product.user.images?.find((img) => img.isProfileImage)
+                      ?.url || "https://via.placeholder.com/50",
+                }}
+                style={styles.sellerImage}
+              />
+              <View style={styles.sellerDetails}>
+                <Text style={styles.sellerName}>
+                  {product.user.nombres} {product.user.apellidos}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         <View style={{ width: "100%", marginTop: 10, paddingHorizontal: 30 }}>
           <ThemedButton onPress={() => {}} style={{ width: "100%" }}>
             Contactar
@@ -157,5 +180,51 @@ const styles = StyleSheet.create({
     color: "#6B7280",
     fontSize: 15,
     lineHeight: 22,
+  },
+
+  sellerContainer: {
+    marginHorizontal: 30,
+    marginTop: 20,
+    marginBottom: 10,
+    padding: 15,
+    backgroundColor: "#F9FAFB",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  sellerTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 12,
+  },
+  sellerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  sellerImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#E5E7EB",
+  },
+  sellerDetails: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  sellerName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 4,
+  },
+  phoneRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  sellerPhone: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: "#6B7280",
   },
 });

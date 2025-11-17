@@ -8,6 +8,7 @@ export interface Product {
   location: Location;
   modality: Modality;
   images: string[];
+  user: User;
 }
 
 export interface Location {
@@ -21,4 +22,23 @@ export interface Modality {
   id: string;
   name: string;
   description: string;
+}
+
+export interface User {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  email: string;
+  telefono?: string;
+  roles: string[];
+  isActive: boolean;
+  ecopoints: number;
+  ecoStatus?: string;
+  images?: UserImage[];
+}
+
+export interface UserImage {
+  id: number;
+  url: string;
+  isProfileImage: boolean;
 }

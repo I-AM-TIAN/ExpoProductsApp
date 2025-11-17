@@ -1,6 +1,8 @@
 // Imports: librerías externas, hooks, componentes
+import { useCreateProduct } from "@/presentation/products/hooks/useCreateProduct";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -15,16 +17,19 @@ import {
   View,
 } from "react-native";
 
+type Modality = "Venta" | "Intercambio" | "Donación";
+
 const SettingsScreen = () => {
+  const router = useRouter();
+  const { loading, createProduct } = useCreateProduct();
+
   const [images, setImages] = useState<string[]>([]);
   const [title, setTitle] = useState("");
-  const [type, setType] = useState<"venta" | "donacion" | "intercambio">(
-    "venta"
-  );
+  const [type, setType] = useState<Modality>("Venta");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -66,29 +71,58 @@ const SettingsScreen = () => {
     setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Validaciones básicas
     if (!title.trim())
       return Alert.alert("Validación", "Ingresa el nombre del producto.");
     if (!location.trim())
       return Alert.alert("Validación", "Ingresa la ubicación.");
     if (!description.trim())
       return Alert.alert("Validación", "Ingresa la descripción.");
-    if (type === "venta" && !price.trim())
+    if (type === "Venta" && !price.trim())
       return Alert.alert("Validación", "Ingresa el precio.");
 
-    setSubmitting(true);
-    // SOLO SIMULACIÓN: aquí guardas localmente o envías al backend cuando quieras
-    setTimeout(() => {
-      setSubmitting(false);
-      Alert.alert("Listo", "Producto guardado localmente (simulado).");
-      // opcional: limpiar formulario
-      // setImages([]);
-      // setTitle("");
-      // setType("venta");
-      // setLocation("");
-      // setDescription("");
-      // setPrice("");
-    }, 900);
+    try {
+      // El hook se encarga de subir las imágenes al backend
+      const product = await createProduct({
+        name: title,
+        description,
+        price,
+        location,
+        modality: type,
+        images,
+        tags,
+      });
+
+      Alert.alert(
+        "✅ Producto creado",
+        `${product.name} ha sido creado exitosamente`,
+        [
+          {
+            text: "Ver producto",
+            onPress: () => {
+              router.push(`/product/${product.id}` as any);
+            },
+          },
+          {
+            text: "Crear otro",
+            style: "cancel",
+            onPress: () => {
+              // Limpiar formulario
+              setImages([]);
+              setTitle("");
+              setType("Venta");
+              setLocation("");
+              setDescription("");
+              setPrice("");
+              setTags([]);
+            },
+          },
+        ]
+      );
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "No se pudo crear el producto");
+    }
   };
 
   return (
@@ -145,14 +179,14 @@ const SettingsScreen = () => {
           <TouchableOpacity
             style={[
               styles.typeBtn,
-              type === "venta" ? styles.typeBtnActive : undefined,
+              type === "Venta" ? styles.typeBtnActive : undefined,
             ]}
-            onPress={() => setType("venta")}
+            onPress={() => setType("Venta")}
           >
             <Text
               style={[
                 styles.typeTxt,
-                type === "venta" ? styles.typeTxtActive : undefined,
+                type === "Venta" ? styles.typeTxtActive : undefined,
               ]}
             >
               Venta
@@ -162,14 +196,14 @@ const SettingsScreen = () => {
           <TouchableOpacity
             style={[
               styles.typeBtn,
-              type === "intercambio" ? styles.typeBtnActive : undefined,
+              type === "Intercambio" ? styles.typeBtnActive : undefined,
             ]}
-            onPress={() => setType("intercambio")}
+            onPress={() => setType("Intercambio")}
           >
             <Text
               style={[
                 styles.typeTxt,
-                type === "intercambio" ? styles.typeTxtActive : undefined,
+                type === "Intercambio" ? styles.typeTxtActive : undefined,
               ]}
             >
               Intercambio
@@ -179,17 +213,17 @@ const SettingsScreen = () => {
           <TouchableOpacity
             style={[
               styles.typeBtn,
-              type === "donacion" ? styles.typeBtnActive : undefined,
+              type === "Donación" ? styles.typeBtnActive : undefined,
             ]}
-            onPress={() => setType("donacion")}
+            onPress={() => setType("Donación")}
           >
             <Text
               style={[
                 styles.typeTxt,
-                type === "donacion" ? styles.typeTxtActive : undefined,
+                type === "Donación" ? styles.typeTxtActive : undefined,
               ]}
             >
-              Donacion
+              Donación
             </Text>
           </TouchableOpacity>
         </View>
@@ -231,7 +265,7 @@ const SettingsScreen = () => {
         </View>
 
         {/* Precio */}
-        {type === "venta" && (
+        {type === "Venta" && (
           <View style={styles.field}>
             <Text style={styles.label}>Precio</Text>
             <TextInput
@@ -249,12 +283,12 @@ const SettingsScreen = () => {
           style={{ paddingHorizontal: 16, marginTop: 20, marginBottom: 40 }}
         >
           <TouchableOpacity
-            style={styles.submitBtn}
+            style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
             onPress={handleSave}
-            disabled={submitting}
+            disabled={loading}
           >
             <Text style={styles.submitTxt}>
-              {submitting ? "Enviando..." : "Agregar"}
+              {loading ? "Creando..." : "Agregar Producto"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -343,6 +377,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
+  },
+  submitBtnDisabled: {
+    opacity: 0.6,
   },
   submitTxt: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });
