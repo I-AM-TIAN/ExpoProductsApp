@@ -18,10 +18,10 @@ interface UseSocketReturn {
   startTyping: (event: TypingEvent) => void;
   stopTyping: (event: Omit<TypingEvent, "userName">) => void;
   markAsRead: (dto: MarkAsReadDto) => void;
-  onNewMessage: (callback: (message: Message) => void) => void;
-  onUserTyping: (callback: (data: TypingEvent) => void) => void;
-  onUserStoppedTyping: (callback: () => void) => void;
-  onMessagesRead: (callback: () => void) => void;
+  onNewMessage: (callback: (message: Message) => void) => () => void;
+  onUserTyping: (callback: (data: TypingEvent) => void) => () => void;
+  onUserStoppedTyping: (callback: () => void) => () => void;
+  onMessagesRead: (callback: () => void) => () => void;
   disconnect: () => void;
 }
 
@@ -109,23 +109,48 @@ export const useSocket = (): UseSocketReturn => {
   };
 
   const onNewMessage = (callback: (message: Message) => void) => {
-    if (!socketRef.current) return;
+    if (!socketRef.current) return () => {};
     socketRef.current.on("newMessage", callback);
+    
+    // Retornar función de limpieza
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("newMessage", callback);
+      }
+    };
   };
 
   const onUserTyping = (callback: (data: TypingEvent) => void) => {
-    if (!socketRef.current) return;
+    if (!socketRef.current) return () => {};
     socketRef.current.on("userTyping", callback);
+    
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("userTyping", callback);
+      }
+    };
   };
 
   const onUserStoppedTyping = (callback: () => void) => {
-    if (!socketRef.current) return;
+    if (!socketRef.current) return () => {};
     socketRef.current.on("userStoppedTyping", callback);
+    
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("userStoppedTyping", callback);
+      }
+    };
   };
 
   const onMessagesRead = (callback: () => void) => {
-    if (!socketRef.current) return;
+    if (!socketRef.current) return () => {};
     socketRef.current.on("messagesRead", callback);
+    
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("messagesRead", callback);
+      }
+    };
   };
 
   const disconnect = () => {

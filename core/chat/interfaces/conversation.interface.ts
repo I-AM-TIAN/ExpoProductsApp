@@ -15,8 +15,11 @@ export interface Conversation {
 
 export interface ConversationUser {
   id: string;
-  nombres: string;
-  apellidos: string;
+  fullName?: string;
+  nombres?: string;
+  apellidos?: string;
+  email?: string;
+  profileImage?: string;
   images?: Array<{
     id: number;
     url: string;

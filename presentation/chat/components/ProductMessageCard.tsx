@@ -30,21 +30,28 @@ export const ProductMessageCard = ({
         activeOpacity={0.8}
       >
         {/* Imagen del producto */}
-        {productImage && typeof productImage === 'string' && productImage.length > 0 ? (
+        {productImage && typeof productImage === 'string' && productImage.length > 0 && !productImage.startsWith('file:///') ? (
           <Image
             source={{ uri: productImage }}
             style={styles.productImage}
             resizeMode="cover"
+            onError={(error) => {
+              console.log('❌ Error cargando imagen:', productImage, error.nativeEvent);
+            }}
+            onLoad={() => {
+              console.log('✅ Imagen cargada correctamente:', productImage);
+            }}
           />
         ) : (
           <View style={styles.placeholderImage}>
             <Ionicons name="image-outline" size={40} color="#9CA3AF" />
+            <Text style={styles.placeholderText}>Sin imagen</Text>
           </View>
         )}
 
         {/* Contenido */}
         <View style={styles.content}>
-          <Text style={styles.label}>Producto de interés</Text>
+          <Text style={styles.label}>PRODUCTO DE INTERÉS</Text>
           <Text style={styles.productName} numberOfLines={2}>
             {productName}
           </Text>
@@ -106,6 +113,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 8,
   },
   content: {
     padding: 12,

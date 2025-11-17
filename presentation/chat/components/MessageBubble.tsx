@@ -1,6 +1,6 @@
 import { Message } from "@/core/chat/interfaces/message.interface";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
 interface MessageBubbleProps {
   message: Message;
@@ -19,6 +19,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     });
   };
 
+  // Detectar si el mensaje es una imagen (data:image)
+  const isImageMessage = message.content?.startsWith("data:image");
+
   return (
     <View
       style={[styles.container, isOwn ? styles.ownMessage : styles.otherMessage]}
@@ -28,9 +31,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           {message.sender.nombres} {message.sender.apellidos}
         </Text>
       )}
-      <Text style={[styles.content, isOwn && styles.ownContent]}>
-        {message.content}
-      </Text>
+      
+      {isImageMessage ? (
+        <Image 
+          source={{ uri: message.content }} 
+          style={styles.image}
+          resizeMode="cover"
+        />
+      ) : (
+        <Text style={[styles.content, isOwn && styles.ownContent]}>
+          {message.content}
+        </Text>
+      )}
+      
       <View style={styles.footer}>
         <Text style={[styles.time, isOwn && styles.ownTime]}>
           {formatTime(message.createdAt)}
@@ -72,6 +85,12 @@ const styles = StyleSheet.create({
   },
   ownContent: {
     color: "#FFFFFF",
+  },
+  image: {
+    width: 200,
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 4,
   },
   footer: {
     flexDirection: "row",

@@ -10,17 +10,19 @@ import { useThemeColor } from "@/presentation/theme/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import {
   Redirect,
+  useFocusEffect,
   useLocalSearchParams,
   useNavigation,
   useRouter,
 } from "expo-router";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -39,6 +41,7 @@ const ProductScreen = () => {
   const { user } = useAuthStore();
 
   const primary = useThemeColor({}, "primary");
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (productQuery.data) {
@@ -47,6 +50,19 @@ const ProductScreen = () => {
       });
     }
   }, [productQuery.data]);
+
+  // Refrescar cuando la pantalla recupera el foco
+  useFocusEffect(
+    useCallback(() => {
+      productQuery.refetch();
+    }, [])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await productQuery.refetch();
+    setRefreshing(false);
+  }, []);
 
   if (productQuery.isLoading) {
     return (
@@ -70,6 +86,26 @@ const ProductScreen = () => {
 
     if (user.id === product.user.id) {
       alert("No puedes contactarte a ti mismo");
+      return;
+    }
+
+    // Validar si el producto está reservado
+    if (product.status === "reservado") {
+      Alert.alert(
+        "Producto reservado",
+        "Este producto ya está reservado. No puedes contactar al vendedor en este momento.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    // Validar si el producto no está disponible
+    if (product.status === "no_disponible") {
+      Alert.alert(
+        "Producto no disponible",
+        "Este producto ya no está disponible.",
+        [{ text: "OK" }]
+      );
       return;
     }
 
@@ -118,7 +154,15 @@ const ProductScreen = () => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#4F7942"]}
+          />
+        }
+      >
         <ProductImages images={product.images} />
 
         {/* título abajo de la imagen */}
@@ -173,6 +217,7 @@ const ProductScreen = () => {
               <Image
                 source={{
                   uri:
+                    product.user.profileImage ||
                     product.user.images?.find((img) => img.isProfileImage)
                       ?.url || "https://via.placeholder.com/50",
                 }}
@@ -188,12 +233,38 @@ const ProductScreen = () => {
         )}
 
         <View style={{ width: "100%", marginTop: 10, paddingHorizontal: 30 }}>
+          {product.status === "reservado" && (
+            <View style={styles.statusBanner}>
+              <Ionicons name="time-outline" size={20} color="#F59E0B" />
+              <Text style={styles.statusBannerText}>
+                Este producto está reservado
+              </Text>
+            </View>
+          )}
+          {product.status === "no_disponible" && (
+            <View style={[styles.statusBanner, { backgroundColor: "#FEE2E2" }]}>
+              <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
+              <Text style={[styles.statusBannerText, { color: "#DC2626" }]}>
+                Este producto ya no está disponible
+              </Text>
+            </View>
+          )}
           <ThemedButton
             onPress={handleContactSeller}
             style={{ width: "100%" }}
-            disabled={creatingConversation}
+            disabled={
+              creatingConversation || 
+              product.status === "reservado" || 
+              product.status === "no_disponible"
+            }
           >
-            {creatingConversation ? "Conectando..." : "Contactar"}
+            {creatingConversation 
+              ? "Conectando..." 
+              : product.status === "reservado" 
+                ? "Producto reservado" 
+                : product.status === "no_disponible"
+                  ? "No disponible"
+                  : "Contactar"}
           </ThemedButton>
         </View>
       </ScrollView>
@@ -289,5 +360,21 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
     color: "#6B7280",
+  },
+  statusBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEF3C7",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    gap: 8,
+  },
+  statusBannerText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#D97706",
+    flex: 1,
   },
 });

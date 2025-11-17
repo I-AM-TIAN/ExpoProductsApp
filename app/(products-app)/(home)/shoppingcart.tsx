@@ -1,7 +1,7 @@
 import ProductList from "@/presentation/products/components/ProductList";
 import { useProducts } from "@/presentation/products/hooks/useProducts";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Text,
@@ -16,6 +16,43 @@ const ShopScreen = () => {
   const [selectedFilter, setSelectedFilter] = useState<
     "all" | "category" | "location"
   >("all");
+
+  // Filtrar productos según búsqueda y filtro seleccionado
+  const filteredProducts = useMemo(() => {
+    const allProducts = productsQuery.data?.pages.flatMap((page) => page) ?? [];
+    
+    if (!searchText.trim()) {
+      return allProducts;
+    }
+
+    return allProducts.filter((product) => {
+      const searchLower = searchText.toLowerCase().trim();
+      
+      // Filtrar según el tipo de filtro seleccionado
+      if (selectedFilter === "all") {
+        // Buscar en todos los campos
+        return product.name.toLowerCase().includes(searchLower) ||
+               product.description.toLowerCase().includes(searchLower) ||
+               product.tags.some(tag => tag.toLowerCase().includes(searchLower)) ||
+               product.modality.name.toLowerCase().includes(searchLower) ||
+               product.location.city.toLowerCase().includes(searchLower) ||
+               product.location.state.toLowerCase().includes(searchLower);
+      }
+
+      if (selectedFilter === "category") {
+        // Buscar solo en modalidad
+        return product.modality.name.toLowerCase().includes(searchLower);
+      }
+
+      if (selectedFilter === "location") {
+        // Buscar solo en ubicación
+        return product.location.city.toLowerCase().includes(searchLower) ||
+               product.location.state.toLowerCase().includes(searchLower);
+      }
+
+      return false;
+    });
+  }, [productsQuery.data, searchText, selectedFilter]);
 
   if (productsQuery.isLoading) {
     return (
@@ -165,7 +202,7 @@ const ShopScreen = () => {
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <ProductList
-        products={productsQuery.data?.pages.flatMap((page) => page) ?? []}
+        products={filteredProducts}
         loadNextPage={loadNextPage}
         ListHeaderComponent={header}
       />

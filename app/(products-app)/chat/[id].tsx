@@ -9,6 +9,7 @@ import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     KeyboardAvoidingView,
     Platform,
@@ -98,7 +99,7 @@ const ChatScreen = () => {
     });
 
     // Escuchar nuevos mensajes
-    onNewMessage((message) => {
+    const unsubscribeNewMessage = onNewMessage((message) => {
       addMessage(message);
 
       // Si el mensaje es del otro usuario, marcarlo como leído
@@ -117,18 +118,21 @@ const ChatScreen = () => {
     });
 
     // Escuchar indicador de escritura
-    onUserTyping((data) => {
+    const unsubscribeTyping = onUserTyping((data) => {
       if (data.userId !== user.id) {
         setIsOtherUserTyping(true);
       }
     });
 
-    onUserStoppedTyping(() => {
+    const unsubscribeStopTyping = onUserStoppedTyping(() => {
       setIsOtherUserTyping(false);
     });
 
     return () => {
       clearTimeout(timeout);
+      unsubscribeNewMessage();
+      unsubscribeTyping();
+      unsubscribeStopTyping();
     };
   }, [isConnected, conversationId, user]);
 
@@ -186,6 +190,22 @@ const ChatScreen = () => {
     });
   };
 
+  const handleSendImage = async (imageBase64: string) => {
+    if (!user || !conversationId) return;
+
+    try {
+      // Enviar la imagen directamente como base64 en el mensaje
+      sendMessage({
+        conversationId,
+        message: imageBase64,
+        senderId: user.id,
+      });
+    } catch (error) {
+      console.error("Error al enviar imagen:", error);
+      Alert.alert("Error", "No se pudo enviar la imagen. Intenta de nuevo.");
+    }
+  };
+
   if (isLoading) {
     return (
       <View style={styles.centerContainer}>
@@ -223,15 +243,29 @@ const ChatScreen = () => {
           const isFirstMessage = index === 0;
           
           if (isFirstMessage && isProductMessage && conversation?.product) {
+            // Manejar tanto strings como objetos {url: string}
+            const validImages = conversation.product.images
+              ?.map((img: any) => {
+                // Si es string, devolverlo directamente
+                if (typeof img === 'string') return img;
+                // Si es objeto con url, extraer la url
+                if (img && typeof img === 'object' && typeof img.url === 'string') return img.url;
+                return null;
+              })
+              .filter((url: string | null): url is string => 
+                url !== null && url.length > 0 && !url.startsWith('file:///')
+              ) ?? [];
+            
+            const productImage = validImages.length > 0 ? validImages[0] : undefined;
+            
+            console.log('🖼️ Imagen del producto:', productImage);
+            console.log('📦 Todas las imágenes:', validImages);
+            
             return (
               <ProductMessageCard
                 productId={conversation.product.id}
                 productName={conversation.product.name}
-                productImage={
-                  conversation.product.images && conversation.product.images.length > 0
-                    ? conversation.product.images[0]
-                    : undefined
-                }
+                productImage={productImage}
                 isOwn={item.senderId === user?.id}
               />
             );
@@ -266,6 +300,7 @@ const ChatScreen = () => {
         onSend={handleSend}
         onTypingStart={handleTypingStart}
         onTypingStop={handleTypingStop}
+        onSendImage={handleSendImage}
       />
 
       {/* Indicador de desconexión */}

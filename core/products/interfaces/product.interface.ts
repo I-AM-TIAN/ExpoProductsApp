@@ -9,6 +9,8 @@ export interface Product {
   modality: Modality;
   images: string[];
   user: User;
+  status?: "disponible" | "reservado" | "no_disponible";
+  createdAt?: string;
 }
 
 export interface Location {
@@ -34,6 +36,7 @@ export interface User {
   isActive: boolean;
   ecopoints: number;
   ecoStatus?: string;
+  profileImage?: string;
   images?: UserImage[];
 }
 

@@ -1,6 +1,9 @@
+import { pickImageFromGallery, takePhoto } from "@/helpers/image-picker.helper";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
+    ActivityIndicator,
+    Alert,
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
@@ -11,6 +14,7 @@ import {
 
 interface ChatInputProps {
   onSend: (message: string) => void;
+  onSendImage?: (imageBase64: string) => void;
   onTypingStart?: () => void;
   onTypingStop?: () => void;
   placeholder?: string;
@@ -18,11 +22,13 @@ interface ChatInputProps {
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
+  onSendImage,
   onTypingStart,
   onTypingStop,
   placeholder = "Escribe un mensaje...",
 }) => {
   const [message, setMessage] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const typingTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleTextChange = (text: string) => {
@@ -61,12 +67,66 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
+  const handleImageFromGallery = async () => {
+    if (!onSendImage) return;
+
+    try {
+      setIsUploadingImage(true);
+      const base64Image = await pickImageFromGallery();
+      
+      if (base64Image) {
+        onSendImage(base64Image);
+      }
+    } catch (error) {
+      console.error("Error al seleccionar imagen:", error);
+      Alert.alert("Error", "No se pudo seleccionar la imagen");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleImageFromCamera = async () => {
+    if (!onSendImage) return;
+
+    try {
+      setIsUploadingImage(true);
+      const base64Image = await takePhoto();
+      
+      if (base64Image) {
+        onSendImage(base64Image);
+      }
+    } catch (error) {
+      console.error("Error al tomar foto:", error);
+      Alert.alert("Error", "No se pudo tomar la foto");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
       <View style={styles.container}>
+        <TouchableOpacity 
+          style={styles.imageButton}
+          onPress={handleImageFromCamera}
+          disabled={isUploadingImage}
+        >
+          {isUploadingImage ? (
+            <ActivityIndicator size="small" color="#5D8370" />
+          ) : (
+            <Ionicons name="camera-outline" size={24} color="#5D8370" />
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.imageButton}
+          onPress={handleImageFromGallery}
+          disabled={isUploadingImage}
+        >
+          <Ionicons name="image-outline" size={24} color="#5D8370" />
+        </TouchableOpacity>
         <TextInput
           style={styles.input}
           value={message}
@@ -101,6 +161,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
+  },
+  imageButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 8,
   },
   input: {
     flex: 1,

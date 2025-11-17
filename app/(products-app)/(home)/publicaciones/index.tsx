@@ -1,60 +1,22 @@
+import { getMyProductsAction } from "@/core/products/actions/get-my-products.action";
+import { updateProductStatusAction } from "@/core/products/actions/update-product-status.action";
+import { Product } from "@/core/products/interfaces/product.interface";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Image,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
-type Post = {
-  id: string;
-  title: string;
-  image?: string;
-  location?: string;
-  price?: string;
-  status: "disponible" | "reservado" | "no_disponible";
-  createdAt: string;
-};
-
-const initialData: Post[] = [
-  {
-    id: "1",
-    title: "Sofá Moderno Gris",
-    image:
-      "https://images.unsplash.com/photo-1549187774-b4e9b0445b3f?w=800&q=80",
-    location: "Bogotá, Cundinamarca",
-    price: "$450.000",
-    status: "disponible",
-    createdAt: "2025-11-10",
-  },
-  {
-    id: "2",
-    title: "Camisa Quilted",
-    image:
-      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&q=80",
-    location: "Medellín, Antioquia",
-    price: "$45.000",
-    status: "reservado",
-    createdAt: "2025-10-20",
-  },
-  {
-    id: "3",
-    title: "Camiseta Negra",
-    image:
-      "https://images.unsplash.com/photo-1520975914305-0d4d0c4c4eaf?w=800&q=80",
-    location: "Cali, Valle",
-    price: "$30.000",
-    status: "no_disponible",
-    createdAt: "2025-09-05",
-  },
-];
-
-const getStatusLabel = (status: string) => {
+const getStatusLabel = (status?: string) => {
   switch (status) {
     case "disponible":
       return "Disponible";
@@ -63,298 +25,382 @@ const getStatusLabel = (status: string) => {
     case "no_disponible":
       return "No disponible";
     default:
-      return status;
+      return "Disponible";
   }
 };
 
-const getStatusColor = (status: string) => {
+const getStatusColor = (status?: string) => {
   switch (status) {
     case "disponible":
-      return "#10B981";
+      return "#10B981"; // Verde
     case "reservado":
-      return "#F59E0B";
+      return "#F59E0B"; // Naranja
     case "no_disponible":
-      return "#EF4444";
+      return "#EF4444"; // Rojo
     default:
-      return "#6B7280";
+      return "#10B981";
   }
 };
 
-const ShoppingcartScreen = () => {
-  const [posts, setPosts] = useState<Post[]>(initialData);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+const MyProductsScreen = () => {
+  const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const openStatusModal = (id: string) => {
-    setSelectedPostId(id);
-    setModalVisible(true);
+  useEffect(() => {
+    loadMyProducts();
+  }, []);
+
+  const loadMyProducts = async () => {
+    try {
+      setLoading(true);
+      const data = await getMyProductsAction();
+      setProducts(data);
+    } catch (error) {
+      console.error("Error cargando productos:", error);
+      Alert.alert("Error", "No se pudieron cargar tus productos");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const changeStatus = (
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadMyProducts();
+    setRefreshing(false);
+  }, []);
+
+  const handleStatusChange = (
+    productId: string,
+    productName: string
+  ) => {
+    Alert.alert(
+      "Cambiar estado",
+      `${productName}\n\nSelecciona el nuevo estado:`,
+      [
+        {
+          text: "🟢 Disponible",
+          onPress: () => updateStatus(productId, "disponible"),
+        },
+        {
+          text: "🟠 Reservado",
+          onPress: () => updateStatus(productId, "reservado"),
+        },
+        {
+          text: "🔴 No disponible",
+          onPress: () => updateStatus(productId, "no_disponible"),
+        },
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+      ]
+    );
+  };
+
+  const updateStatus = async (
+    productId: string,
     newStatus: "disponible" | "reservado" | "no_disponible"
   ) => {
-    if (selectedPostId) {
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === selectedPostId ? { ...p, status: newStatus } : p
-        )
+    try {
+      await updateProductStatusAction(productId, newStatus);
+      
+      setProducts((prev) =>
+        prev.map((p) => (p.id === productId ? { ...p, status: newStatus } : p))
+      );
+
+      Alert.alert("Éxito", `Estado actualizado a: ${getStatusLabel(newStatus)}`);
+    } catch (error: any) {
+      console.error("Error actualizando estado:", error);
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "No se pudo actualizar el estado"
       );
     }
-    setModalVisible(false);
   };
 
-  const removePost = (id: string) => {
-    Alert.alert("Eliminar publicación", "¿Deseas eliminar esta publicación?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: () => setPosts((prev) => prev.filter((p) => p.id !== id)),
-      },
-    ]);
+  const handleDeleteProduct = (productId: string, productName: string) => {
+    Alert.alert(
+      "Eliminar publicación",
+      `¿Estás seguro de eliminar "${productName}"?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: () => Alert.alert("Próximamente", "Esta función estará disponible pronto"),
+        },
+      ]
+    );
   };
 
-  const renderItem = ({ item }: { item: Post }) => (
-    <View style={styles.card}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <View style={styles.info}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.meta}>
-          {item.location} • {item.createdAt}
-        </Text>
+  const handleViewProduct = (productId: string) => {
+    router.push(`/product/${productId}` as any);
+  };
 
-        <View style={styles.row}>
+  const formatPrice = (price: number) => {
+    return `$${price.toLocaleString("es-CO")}`;
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-CO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  };
+
+  const getProductImage = (images: any[]) => {
+    if (!images || images.length === 0) return undefined;
+    
+    const validImages = images
+      .map((img: any) => {
+        if (typeof img === 'string') return img;
+        if (img && typeof img === 'object' && typeof img.url === 'string') return img.url;
+        return null;
+      })
+      .filter((url: string | null): url is string => 
+        url !== null && url.length > 0 && !url.startsWith('file:///')
+      );
+    
+    return validImages.length > 0 ? validImages[0] : undefined;
+  };
+
+  const renderProduct = ({ item }: { item: Product }) => {
+    const productImage = getProductImage(item.images);
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardContent}>
           <TouchableOpacity
-            style={[
-              styles.statusBtn,
-              { backgroundColor: getStatusColor(item.status) },
-            ]}
-            onPress={() => openStatusModal(item.id)}
+            onPress={() => handleViewProduct(item.id)}
+            activeOpacity={0.8}
           >
-            <Text style={styles.statusBtnTxt}>
-              {getStatusLabel(item.status)}
+            {productImage ? (
+              <Image source={{ uri: productImage }} style={styles.image} />
+            ) : (
+              <View style={styles.placeholderImage}>
+                <Ionicons name="image-outline" size={40} color="#9CA3AF" />
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.info}>
+            <TouchableOpacity onPress={() => handleViewProduct(item.id)}>
+              <Text style={styles.title} numberOfLines={2}>
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.meta}>
+              {item.location.city}, {item.location.state} • {formatDate(item.createdAt)}
             </Text>
-            <Ionicons
-              name="chevron-down"
-              size={16}
-              color="#fff"
-              style={{ marginLeft: 6 }}
-            />
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.deleteBtn}
-            onPress={() => removePost(item.id)}
-          >
-            <Text style={styles.deleteTxt}>Eliminar</Text>
-          </TouchableOpacity>
+            <View style={styles.statusPriceRow}>
+              <TouchableOpacity
+                style={[
+                  styles.statusBtn,
+                  { backgroundColor: getStatusColor(item.status) },
+                ]}
+                onPress={() => handleStatusChange(item.id, item.name)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.statusBtnText}>
+                  {getStatusLabel(item.status)}
+                </Text>
+                <Ionicons name="chevron-down" size={14} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              <Text style={styles.price}>{formatPrice(item.price)}</Text>
+            </View>
+          </View>
         </View>
 
-        <Text style={styles.price}>{item.price}</Text>
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={() => handleDeleteProduct(item.id, item.name)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.deleteBtnText}>Eliminar</Text>
+        </TouchableOpacity>
       </View>
-    </View>
-  );
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#4F7942" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Historial de publicaciones</Text>
-
-      {posts.length === 0 ? (
-        <View style={styles.empty}>
-          <Text style={styles.emptyTxt}>No tienes publicaciones todavía.</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={posts}
-          keyExtractor={(i) => i.id}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 120 }}
-        />
-      )}
-
-      {/* Modal para cambiar estado */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Cambiar estado</Text>
-
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={() => changeStatus("disponible")}
-            >
-              <View
-                style={[styles.modalBadge, { backgroundColor: "#10B981" }]}
-              />
-              <Text style={styles.modalOptionTxt}>Disponible</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={() => changeStatus("reservado")}
-            >
-              <View
-                style={[styles.modalBadge, { backgroundColor: "#F59E0B" }]}
-              />
-              <Text style={styles.modalOptionTxt}>Reservado</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalOption}
-              onPress={() => changeStatus("no_disponible")}
-            >
-              <View
-                style={[styles.modalBadge, { backgroundColor: "#EF4444" }]}
-              />
-              <Text style={styles.modalOptionTxt}>No disponible</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.modalCancel}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.modalCancelTxt}>Cancelar</Text>
-            </TouchableOpacity>
+      <FlatList
+        data={products}
+        renderItem={renderProduct}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Historial de publicaciones</Text>
+            <Text style={styles.headerSubtitle}>
+              {products.length} {products.length === 1 ? "producto" : "productos"}
+            </Text>
           </View>
-        </View>
-      </Modal>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="cube-outline" size={64} color="#D1D5DB" />
+            <Text style={styles.emptyTitle}>Sin publicaciones</Text>
+            <Text style={styles.emptyText}>
+              Aún no has publicado ningún producto
+            </Text>
+          </View>
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#4F7942"]}
+          />
+        }
+      />
     </View>
   );
 };
 
-export default ShoppingcartScreen;
+export default MyProductsScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F9FAFB",
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F9FAFB",
+  },
+  listContent: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingBottom: 20,
   },
   header: {
-    fontSize: 20,
+    paddingTop: 16,
+    paddingBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
     fontWeight: "700",
-    marginBottom: 12,
-    color: "#111",
+    color: "#111827",
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#6B7280",
   },
   card: {
-    flexDirection: "row",
-    marginBottom: 12,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
     overflow: "hidden",
-    elevation: 1,
+  },
+  cardContent: {
+    flexDirection: "row",
+    padding: 12,
   },
   image: {
-    width: 110,
-    height: 110,
-    backgroundColor: "#eee",
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+  },
+  placeholderImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    justifyContent: "center",
+    alignItems: "center",
   },
   info: {
     flex: 1,
-    padding: 12,
+    marginLeft: 12,
     justifyContent: "space-between",
   },
   title: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#111",
+    fontWeight: "600",
+    color: "#111827",
+    marginBottom: 4,
+    lineHeight: 22,
   },
   meta: {
-    fontSize: 12,
-    color: "#6b7280",
-    marginTop: 4,
+    fontSize: 13,
+    color: "#6B7280",
+    marginBottom: 8,
   },
-  row: {
+  statusPriceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 8,
-    gap: 8,
   },
   statusBtn: {
-    flex: 1,
     flexDirection: "row",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    justifyContent: "center",
     alignItems: "center",
-  },
-  statusBtnTxt: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 12,
-  },
-  deleteBtn: {
-    paddingVertical: 8,
     paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
   },
-  deleteTxt: {
-    color: "#ef4444",
+  statusBtnText: {
+    color: "#FFFFFF",
+    fontSize: 13,
     fontWeight: "600",
-    fontSize: 12,
   },
   price: {
-    marginTop: 8,
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#111",
-  },
-  empty: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 60,
-  },
-  emptyTxt: {
-    color: "#6b7280",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 24,
-    paddingBottom: 40,
-  },
-  modalTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#111",
-    marginBottom: 16,
+    color: "#111827",
   },
-  modalOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  modalBadge: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginRight: 12,
-  },
-  modalOptionTxt: {
-    fontSize: 16,
-    color: "#111",
-    fontWeight: "600",
-  },
-  modalCancel: {
-    marginTop: 16,
+  deleteBtn: {
     paddingVertical: 12,
-    backgroundColor: "#f3f4f6",
-    borderRadius: 12,
-    alignItems: "center",
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    alignItems: "flex-end",
   },
-  modalCancelTxt: {
-    color: "#6b7280",
+  deleteBtnText: {
+    color: "#EF4444",
+    fontSize: 14,
     fontWeight: "600",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 80,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#9CA3AF",
+    textAlign: "center",
   },
 });
