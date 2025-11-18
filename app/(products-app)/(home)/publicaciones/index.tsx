@@ -120,21 +120,6 @@ const MyProductsScreen = () => {
     }
   };
 
-  const handleDeleteProduct = (productId: string, productName: string) => {
-    Alert.alert(
-      "Eliminar publicación",
-      `¿Estás seguro de eliminar "${productName}"?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: () => Alert.alert("Próximamente", "Esta función estará disponible pronto"),
-        },
-      ]
-    );
-  };
-
   const handleViewProduct = (productId: string) => {
     router.push(`/product/${productId}` as any);
   };
@@ -218,14 +203,6 @@ const MyProductsScreen = () => {
             </View>
           </View>
         </View>
-
-        <TouchableOpacity
-          style={styles.deleteBtn}
-          onPress={() => handleDeleteProduct(item.id, item.name)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.deleteBtnText}>Eliminar</Text>
-        </TouchableOpacity>
       </View>
     );
   };
@@ -373,18 +350,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#111827",
-  },
-  deleteBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-    alignItems: "flex-end",
-  },
-  deleteBtnText: {
-    color: "#EF4444",
-    fontSize: 14,
-    fontWeight: "600",
   },
   emptyContainer: {
     alignItems: "center",
